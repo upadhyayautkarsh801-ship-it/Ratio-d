@@ -1,3 +1,31 @@
+# Ratio'd (fork): QR phishing detection, evaluation & hardening
+
+> **This is a fork of [VedxntDev/Ratio-d](https://github.com/VedxntDev/Ratio-d)** (MIT), created by **Vedant**.
+> The original architecture, rule engine, Laya scorer, extension, web console and documentation below are **his work**.
+> The section underneath describes **only what I (Utkarsh Upadhyaya) added or changed**.
+
+## My contribution
+
+**1. QR-code phishing (quishing) path**
+- In-browser QR decoding: `BarcodeDetector` with a vendored `jsQR` fallback, multi-scale retry, camera / paste / drag-and-drop input.
+- `server/rules/qr.js`: zero-dependency rule engine for QR payloads (lookalike/homoglyph domains, raw-IP and punycode hosts, `user@host` tricks, shorteners, abused TLDs, free hosting, open-redirect parameters, pre-filled victim email, UPI "refund" collect scams, crypto and dangerous URI schemes).
+- Web-console panel with a 4-step tracker (capture, decode, analyze, verdict), and a Gmail content script that scans inline and attachment images (best effort).
+- Run with `node start.js`, which wraps the original `server.js` and adds `POST /analyze-qr`.
+
+**2. Evaluation on real data** (`tools/eval-qr.js`, deterministic seed)
+- 5,000 phishing URLs (Phishing.Database) vs 5,000 popular domains (OpenDNS top list).
+- Result: **96.8% precision, 99.6% specificity, 12.7% recall** (first version: 83.8% / 98.6% / 7.0%).
+- Recall is low because most real phishing URLs look ordinary as text (compromised sites, random domains). Next step: resolve redirects and add reputation lookups. Full write-up: [`docs/QR-DETECTION.md`](docs/QR-DETECTION.md).
+
+**3. Hardening**
+- Hostile-payload safe UI: `textContent` only, payloads shown defanged and never clickable.
+- PII redacted client-side before any request leaves the browser.
+- Payload size limits and CORS handled in the wrapper server.
+
+**Not claimed:** the hackathon timeline, the detection engine for email text, and the rest of the README below belong to the original author.
+
+---
+
 # Ratio'd — Scam Risk Analyzer & Defense System
 **Cybersecurity & Defense Track · Developed by [Vedant](https://github.com/VedxntDev)**
 
